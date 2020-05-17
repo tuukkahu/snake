@@ -18,26 +18,22 @@ class Head {
         const ctx = canvas.getContext('2d');
         let awidth = this._width;
         let headimg = new Image();
-        headimg.src = 'http://localhost:8000/snake/head.png';
+        headimg.src = 'http://localhost:8000/modules/head.png';
         let ax = this._x;
         let ay = this._y;
         headimg.onload = function() {
             ctx.drawImage(this, ax+1, ay+1, awidth, awidth);
         };
-        //ctx.fillStyle = 'rgb(255, 0, 0)';
-        //ctx.fillRect(this._x+this._offset, this._y+this._offset, this._width, this._width);
     }
 
     move(dir, body, apple) {
         const canvas = document.querySelector('.background');
         const ctx = canvas.getContext('2d');
-        //ctx.fillStyle = 'rgb(153, 255, 102)';
-        //ctx.fillRect(this._x+this._offset, this._y+this._offset, this._width, this._width);
-        
+
         if (body.length == 0) {
             let awidth = this._width;
             let bgimage = new Image();
-            bgimage.src = 'http://localhost:8000/snake/bg.png';
+            bgimage.src = 'http://localhost:8000/modules/bg.png';
             let ax = this._x;
             let ay = this._y;
             bgimage.onload = function() {

@@ -1,10 +1,11 @@
-import { Head } from 'http://localhost:8000/snake/head.js';
-import { Body, Apple } from 'http://localhost:8000/snake/body.js';
+import { Head } from 'http://localhost:8000/modules/head.js';
+import { Body, Apple } from 'http://localhost:8000/modules/body.js';
 
 const blockWidth = 28;
 const size = 20;
 var dir = [0, 0];
 var game_over = false;
+var prev_key;
 window.addEventListener("keydown", onKeyDown, false);
 
 function sleep(ms) {
@@ -16,32 +17,16 @@ function drawBackground() {
     const ctx = canvas.getContext('2d');
     const width = canvas.width = size * (blockWidth + 2);
     const height = canvas.height = width;
-    //let bgimage = new Image(width, height);
 
     for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
             let bgimage = new Image(width, height);
-            bgimage.src = 'http://localhost:8000/snake/bg.png';
+            bgimage.src = 'http://localhost:8000/modules/bg.png';
             bgimage.onload = function() {
                 ctx.drawImage(bgimage, i*(blockWidth+2), j*(blockWidth+2), blockWidth+2, blockWidth+2);
             };
         }
     }
-
-    /*
-        // TODO: remove the lines?
-    for (var i = 0; i <= size * (blockWidth + 2); i += blockWidth + 2) {
-        ctx.moveTo(0, i);
-        ctx.lineTo(canvas.width, i);
-        ctx.stroke();
-    }
-    for ( i = 0; i <= size * (blockWidth + 2); i += blockWidth + 2) {
-        ctx.moveTo(i, 0);
-        ctx.lineTo(i, canvas.height);
-        ctx.stroke();
-    }
-    */
-    return;
 }
 
 function generateApple(head, body) {
@@ -75,28 +60,38 @@ function generateApple(head, body) {
 function onKeyDown(event) {
     var keyCode = event.keyCode;
     // keys in order W A S D
-    if (keyCode == 87 && dir !== [0, 1]) {
+    if (keyCode == 87 && prev_key != 83) {
         dir = [0, -1];
-    } else if (keyCode == 65 && dir !== [1, 0]) {
+        prev_key = 87;
+    } else if (keyCode == 65 && prev_key != 68) {
         dir = [-1, 0];
-    } else if (keyCode == 83 && dir !== [0, -1]) {
+        prev_key = 65;
+    } else if (keyCode == 83 && prev_key != 87) {
         dir = [0, 1];
-    } else if (keyCode == 68 && dir !== [-1, 0]) {
+        prev_key = 83;
+    } else if (keyCode == 68 && prev_key != 65) {
         dir = [1, 0];
-    } else {
+        prev_key = 68;
+    } else if (keyCode == 81) {
         game_over = true;
+    } else if (keyCode == 82) {
+        location = location;
     }
 }
 
-async function main() {
-    const canvas = document.querySelector('.background');
-    const ctx = canvas.getContext('2d');
+function addPoint(points) {
+    points += 1;
+    document.getElementById("points_number").innerHTML = points;
+    return points;
+}
 
+async function main() {
     let to_do;
-    await drawBackground();
+    drawBackground();
     let head = new Head((size/2-1)*(blockWidth+2), (size/2-1)*(blockWidth+2), blockWidth);
     head.draw();
     let body = [];
+    let points = 0;
     let bodypart;
     let apple = generateApple(head, body);
     let old_headx;
@@ -106,7 +101,7 @@ async function main() {
         old_headx = head.x;
         old_heady = head.y;
         // speed
-        await sleep(60);
+        await sleep(90);
         to_do = head.move(dir, body, apple[0]);
         if (body.length > 0) {
             if (body.length == 1) {
@@ -133,16 +128,18 @@ async function main() {
                 let last_body = body[body.length - 1];
                 let last_xdir = (body[body.length - 2].x - last_body.x)/(blockWidth+2);
                 let last_ydir = (body[body.length - 2].y - last_body.y)/(blockWidth+2);
-                bodypart = new Body(last_body.x-last_xdir*(blockWidth+2), last_body.y-last_ydir*(blockWidth+2), blockWidth, dir);
+                bodypart = new Body(last_body.x-last_xdir*(blockWidth+2), last_body.y-last_ydir*(blockWidth+2), blockWidth);
             } else if (body.length === 0) {
-                bodypart = new Body(head.x-dir[0]*(blockWidth+2), head.y-dir[1]*(blockWidth+2), blockWidth, dir);
+                bodypart = new Body(head.x-dir[0]*(blockWidth+2), head.y-dir[1]*(blockWidth+2), blockWidth);
             } else {
-                bodypart = new Body(body[0].x-dir[0]*(blockWidth+2), body[0].y-dir[1]*(blockWidth+2), blockWidth, dir);
+                bodypart = new Body(body[0].x-dir[0]*(blockWidth+2), body[0].y-dir[1]*(blockWidth+2), blockWidth);
             }
+            points = addPoint(points);
             body.push(bodypart);
             bodypart.draw();
         } else if (to_do === 2) {
             game_over = true;
+            window.alert("Game over! Refresh the page to start again.");
         }
     }
 
